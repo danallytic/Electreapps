@@ -1,7 +1,11 @@
+# Created by: Prof. Valdecy Pereira, D.Sc.
+# UFF - Universidade Federal Fluminense (Brazil)
+# email:  valdecy.pereira@gmail.com
+# GitHub Repository: <https://github.com/Valdecy>
+
 import math
 import matplotlib.pyplot as plt
 import numpy as np
-
 from collections import defaultdict
 
 # Function: Cycle Finder 

@@ -1,6 +1,10 @@
+# Module Created by: Prof. Valdecy Pereira, D.Sc.
+# UFF - Universidade Federal Fluminense (Brazil)
+# email:  valdecy.pereira@gmail.com
+# GitHub Repository: <https://github.com/Valdecy>
+
 import matplotlib.pyplot as plt
 import numpy as np
-
 
 # Function - Counting M
 def m_count_matrices(dataset, P, Q, V):

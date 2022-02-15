@@ -1,3 +1,9 @@
+
+# Module Created by: Prof. Valdecy Pereira, D.Sc.
+# UFF - Universidade Federal Fluminense (Brazil)
+# email:  valdecy.pereira@gmail.com
+# GitHub Repository: <https://github.com/Valdecy>
+
 import copy
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
