@@ -2,9 +2,27 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QColor, QIcon, QImage, QKeySequence, QPalette,QBrush
 from PyQt5.QtCore import Qt, QSize, QRect
 import sys
+import os
 import numpy as np
 import json as  jn
 import electre1, electre2, electre3, electre4, electreis, electreiv, electretri
+
+def resource_path(relative_path):
+            """ Get absolute path to resource, works for dev and for PyInstaller """
+            base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+            return os.path.join(base_path, relative_path)
+global image_dir, data_dir
+image_dir = resource_path("images")
+data_dir = resource_path("data")
+
+global msg
+
+def msg(self,message):
+    Msg=QMessageBox(self)
+    Msg.setIcon(QMessageBox.Warning)
+    Msg.setText(message)
+    Msg.show()
+
 # implémentation des rapports sortie (rapport des resultats du calcule)
 class doc_sortie(QMdiSubWindow):
     def __init__(self):
@@ -31,7 +49,7 @@ class doc_sortie(QMdiSubWindow):
             file.write(contenu)
             file.close()
         else:
-            self.msg("Le fichier n'a pas été sauvegardé")
+            msg(self,"Le fichier n'a pas été sauvegardé")
     def close_table(self,event):
         if QMessageBox.question(self, 'Message', "Voulez-vous fermer le rapport?", QMessageBox.Ok, QMessageBox.Cancel)==QMessageBox.Ok:
             for action in self.parent().parent().parent().Fenetre_menu.actions():
@@ -350,6 +368,7 @@ class n_table(QMdiSubWindow):
         self.menu.addAction(self.sortie)
         self.menu.show()
         self.resizeEvent=self.adapt_menu
+        
     # adapter le menu à la fenêtre
     def adapt_menu(self,event):
         super().resizeEvent(event)
@@ -448,7 +467,7 @@ class n_table(QMdiSubWindow):
     def valide_proj(self):
         if self.edit_titre.text().strip()!="" and self.nbchoix.value()!=0 and self.nbcriteres.value()!=0 and self.seuilconc.value()*self.seuilconc2.value()*self.seuilconc3.value()*self.seuildisc.value()*self.seuildisc2.value()!=0:
             if self.electr_ii.isChecked() and not(self.seuilconc.value()<self.seuilconc2.value() and self.seuilconc2.value()<self.seuilconc3.value() and self.seuildisc.value()<self.seuildisc2.value()):
-                self.msg("les seuils de concordance ainsi que de discordance doivent être strictement croissants!")
+                msg(self,"les seuils de concordance ainsi que de discordance doivent être strictement croissants!")
                 return
             self.D_projet["methode"]=1*self.electr_i.isChecked()+2*self.electr_is.isChecked()+3*self.electr_iv.isChecked()+4*self.electr_ii.isChecked()+5*self.electr_iii.isChecked()+6*self.electr_4.isChecked()+7*self.electr_tri.isChecked()
             self.D_projet["titre"]=self.edit_titre.text()+" "+"("+self.D_projet["n_methode"]+")"
@@ -471,7 +490,7 @@ class n_table(QMdiSubWindow):
             
             self.D_projet["valid"][0]=1
         else:
-            self.msg("Complettez les données avant de valider!")
+            msg(self,"Complettez les données avant de valider!")
             
     # valider les labèles des critères et des alternatives
     def valide_criteres(self):
@@ -533,7 +552,7 @@ class n_table(QMdiSubWindow):
             self.table_performances.setHorizontalHeaderLabels(entetes)
             self.table_performances.setVerticalHeaderLabels(self.D_projet["choix"])
         else:
-            self.msg("Verifier les nombres des choix et des critères avant de valider!\n"+" Nombre de choix="+str(self.D_projet["nbchoix"])+" et nombre de critères="+str(self.D_projet["nbcriteres"]))
+            msg(self,"Verifier les nombres des choix et des critères avant de valider!\n"+" Nombre de choix="+str(self.D_projet["nbchoix"])+" et nombre de critères="+str(self.D_projet["nbcriteres"]))
     # éditer un labèle d'alternative
     def edit_choix(self):
         index = self.liste_choix.currentIndex()
@@ -587,25 +606,25 @@ class n_table(QMdiSubWindow):
                 for column in range(self.table_poids.columnCount()):
                     item = self.table_poids.item(3, column)
                     if float(item.text())<0 or float(item.text())>1:
-                        self.msg("les seuils de veto doivent être compris entre 0 et 1")
+                        msg(self,"les seuils de veto doivent être compris entre 0 et 1")
                         return
             if self.D_projet["methode"] == 6:
                 for column in range(self.table_poids.columnCount()):
                     item = self.table_poids.item(2, column)
                     if float(item.text())<0 or float(item.text())>1:
-                        self.msg("les seuils de veto doivent être compris entre 0 et 1")
+                        msg(self,"les seuils de veto doivent être compris entre 0 et 1")
                         return
             if self.D_projet["methode"] == 3:
                 for column in range(self.table_poids.columnCount()):
                     item = self.table_poids.item(1, column)
                     if float(item.text())<0 or float(item.text())>1:
-                        self.msg("les seuils de veto doivent être compris entre 0 et 1")
+                        msg(self,"les seuils de veto doivent être compris entre 0 et 1")
                         return
             if self.D_projet["methode"] == 6:
                 for column in range(self.table_poids.columnCount()):
                     item = self.table_poids.item(1, column)
                     if float(item.text())<0 or float(item.text())>1:
-                        self.msg("les seuils p doivent être compris entre 0 et 1")
+                        msg(self,"les seuils p doivent être compris entre 0 et 1")
                         return
             try:
                 self.D_projet["poids"],self.D_projet["seuilsp"],self.D_projet["seuilsq"],self.D_projet["seuilsveto"]=[],[],[],[]
@@ -625,7 +644,7 @@ class n_table(QMdiSubWindow):
                             self.D_projet["seuilsq"].append(float(item.text()))
                             self.D_projet["seuilsp"].append(float(item2.text()))
                         else:
-                            self.msg("les seuils p doivent être inferieurs aux seuils q et compris entre 0 et 1")
+                            msg(self,"les seuils p doivent être inferieurs aux seuils q et compris entre 0 et 1")
                             return
                     
                     for column in range(self.table_poids.columnCount()):
@@ -647,7 +666,7 @@ class n_table(QMdiSubWindow):
                 self.fermer_param.setStyleSheet("background-color: lightgreen;")
             except:
                 self.D_projet["poids"],self.D_projet["seuilsp"],self.D_projet["seuilsq"],self.D_projet["seuilsveto"]=[],[],[],[]
-                self.msg("Complettez correctement les données avant de valider!")
+                msg(self,"Complettez correctement les données avant de valider!")
 
     # valider les performances des alternatives
     def valid_perf(self):
@@ -669,13 +688,13 @@ class n_table(QMdiSubWindow):
                         lignep.append(i)
                         self.D_projet["profils"].append(lignep)
                 else:
-                    self.msg("Les profiles choisis prennent la valeur (1) les autres (0)")
+                    msg(self,"Les profiles choisis prennent la valeur (1) les autres (0)")
                     return
             print(self.D_projet["profils"])
             self.D_projet["titresimple"]=self.D_projet["titre"].replace(" ", "")
         except:
             self.D_projet["perf"]=[]
-            self.msg("Complettez correctement les données avant de valider!")
+            msg(self,"Complettez correctement les données avant de valider!")
 
     # permet l'edition du projet pour changer ses paramétres
     def reinitiatise_projet(self):
@@ -724,7 +743,7 @@ class n_table(QMdiSubWindow):
             self.menu.resize(self.width(),30)
             self.setMinimumSize(1275,650)
         else:
-            self.msg("Complettez les données avant de fermer la table des parametres!")
+            msg(self,"Complettez les données avant de fermer la table des parametres!")
 
     # afficher les paramétres d'un projet
     def affich_param(self):
@@ -744,7 +763,7 @@ class n_table(QMdiSubWindow):
                 self.valider_perf.setVisible(True)
                 self.afficher_param.setText("Paramètres")
             else:
-                self.msg("Validez d'abord vos changements!")
+                msg(self,"Validez d'abord vos changements!")
 
     # enregistrer un projet
     def save_project(self):
@@ -752,7 +771,8 @@ class n_table(QMdiSubWindow):
             fichierdlg =QFileDialog.getSaveFileName(
                 parent=self,
                 caption='Enregistrer un fichier',
-                directory=self.path[0]+"/data/"+self.D_projet["titre"]+" "+self.D_projet["n_methode"]+".elec" ,
+                directory=data_dir + self.D_projet["titre"]+" "+self.D_projet["n_methode"]+".elec" ,
+                # directory=self.path[0]+"/data/"+self.D_projet["titre"]+" "+self.D_projet["n_methode"]+".elec" ,
                 filter='Fichiers Electre (*.elec)',
 
             )
@@ -762,10 +782,10 @@ class n_table(QMdiSubWindow):
                 jn.dump(self.D_projet,fichier)
                 fichier.close()
             else:
-                self.msg("L'enregistrement a été annulé")
+                msg(self,"L'enregistrement a été annulé")
 
         except:
-            self.msg("L'enregistrement a été abandonné suite à une erreur système")
+            msg(self,"L'enregistrement a été abandonné suite à une erreur système")
             
     # ouvrir un projet sauvegardé sur le disque
     def open_project(self):
@@ -773,13 +793,18 @@ class n_table(QMdiSubWindow):
             fichierdlg =QFileDialog.getOpenFileName(
                 parent=self,
                 caption='Ouvrir un fichier',
-                directory=self.path[0]+"/data/",
+                directory=data_dir,
+                # directory=self.path[0]+"/data/",
                 filter='Fichiers Electre (*.elec)',
             )
             nfichier=fichierdlg[0]
             if nfichier=="":
+                for action in self.parent().parent().parent().Fenetre_menu.actions():
+                    if action.text()==self.windowTitle():
+                        self.parent().parent().parent().Fenetre_menu.removeAction(action)
                 self.deleteLater()
-                return
+                ok=False 
+                return ok
             else:
                 fichier = open(nfichier, "r")
                 self.D_projet = jn.load(fichier)
@@ -876,6 +901,8 @@ class n_table(QMdiSubWindow):
                 self.D_projet["valid"]=[1,1,1]
                 self.show()
                 self.valide_proj
+                ok=True
+                return ok
         except:
             for action in self.parent().parent().parent().Fenetre_menu.actions():
                 if action.text()==self.windowTitle():
@@ -885,6 +912,8 @@ class n_table(QMdiSubWindow):
             msg.setText("le fichier n'a pas pu être entierement chargé")
             msg.show()
             self.deleteLater()
+            ok=False
+            return ok
     # générer le rapport des résultats d'un projet
     def sortie_resultats(self):
         if self.resultats!=():
@@ -907,15 +936,11 @@ class n_table(QMdiSubWindow):
             if self.D_projet["methode"]==7:
                 resultats=electretri.electre_tri_b(self.D_projet["choix"], np.array(self.D_projet["perf"]), self.D_projet["poids"], self.D_projet["seuilsq"], self.D_projet["seuilsp"], self.D_projet["seuilsveto"], self.D_projet["profils"], self.D_projet["seuilconc"], verbose = True, rule = self.D_projet["regle"], graph = True)
             self.resultats=resultats
-            resultats[-1].savefig(sys.path[0]+"/images/graph.jpg", bbox_inches='tight', dpi=150)
+            # resultats[-1].savefig(sys.path[0]+"/images/graph.jpg", bbox_inches='tight', dpi=150)
+            resultats[-1].savefig(image_dir+"\graph.jpg", bbox_inches='tight', dpi=150)
             resultats[-1].clf()
-            self.msg("Le calcule est terminé vous pouvez affichez les résultats")
+            msg(self,"Le calcule est terminé vous pouvez affichez les résultats")
             
-    def msg(self,message):
-        Msg=QMessageBox(self)
-        Msg.setIcon(QMessageBox.Warning)
-        Msg.setText(message)
-        Msg.show()
 
 # implémentation de la fenêtre principale
 class MainWindow(QMainWindow):
@@ -934,7 +959,8 @@ class MainWindow(QMainWindow):
         # definition du processus de fermeture d'une fenêtre
         self.closeEvent=self.close_window
         # image et couleur de l'arrière plan
-        oImage = QImage(self.path[0]+"/images/chemins2.jpg")
+        # oImage = QImage(self.path[0]+"/images/chemins2.jpg")
+        oImage = QImage(image_dir + "\chemins2.jpg")
         self.setAutoFillBackground(True)
         palette = self.palette() 
         palette.setColor(QPalette.Window, QColor(200,150,190))            #QPalette.Window= 10 = Windowrole
@@ -947,26 +973,26 @@ class MainWindow(QMainWindow):
         toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         # definition des actions
         # action d'ouverture de fichiers
-        open=QAction(QIcon(self.path[0]+"/images/open.png"),"Ouvrir",self)
+        open=QAction(QIcon(image_dir+"\open.png"),"Ouvrir",self)
         open.setStatusTip("Ouvre un fichier déjà existant")
         open.triggered.connect(self.openAction)
         open.setShortcut(QKeySequence("Ctrl+o"))
         toolbar.addAction(open)
         # action de creation de nouveaux fichiers
-        new=QAction(QIcon(self.path[0]+"/images/new.png"),"Nouveau",self)
+        new=QAction(QIcon(image_dir+"\\new.png"),"Nouveau",self)
         self.nbtables=0
         new.setStatusTip("Ouvre un nouveau fichier")
         new.triggered.connect(self.newAction)
         new.setShortcut(QKeySequence("Ctrl+n"))
         toolbar.addAction(new)
         # action de sauvegarde de fichiers
-        save=QAction(QIcon(self.path[0]+"/images/save.png"),"Enregistrer",self)
+        save=QAction(QIcon(image_dir+"\save.png"),"Enregistrer",self)
         save.setStatusTip("Sauvegarde le fichier en cours d'utilisation")
         save.triggered.connect(self.saveAction)
         save.setShortcut(QKeySequence("Ctrl+s"))
         toolbar.addAction(save)
         # action de fermeture de l'application
-        quit=QAction(QIcon(self.path[0]+"/images/quit.png"),"Quitter",self)
+        quit=QAction(QIcon(image_dir+"\quit.png"),"Quitter",self)
         quit.setStatusTip("Ferme les fichiers et quitte l'application")
         quit.triggered.connect(self.quitAction)
         quit.setShortcut(QKeySequence("Ctrl+q"))
@@ -993,6 +1019,7 @@ class MainWindow(QMainWindow):
         Affichage_menu.addAction(affiche)
         Affichage_menu.addAction(masquer)
         self.Fenetre_menu=self.menu.addMenu("Fenêtres")
+        
     # definition des slots d'actions
     # action neauveau projet
     def newAction(self):
@@ -1021,10 +1048,15 @@ class MainWindow(QMainWindow):
         sub=self.newAction()
         sub.hide()
         try:
-            sub.open_project()
+            ok=sub.open_project()
+            if not(ok):
+                for action in self.Fenetre_menu.actions():
+                    if action.text()==sub.windowTitle():
+                        self.Fenetre_menu.removeAction(action)
         except:
             for action in self.Fenetre_menu.actions():
                 if action.text()==sub.windowTitle():
+                    print(action.text())
                     self.Fenetre_menu.removeAction(action)
             sub.deleteLater()
             return
@@ -1196,7 +1228,7 @@ class MainWindow(QMainWindow):
             sub.sortie.append(html_text)
             sub.show()
             
-        graph_img=sys.path[0]+"/images/graph.jpg"
+        graph_img=image_dir+"\graph.jpg"
         html_text='<br> Representation graphique du résultat:<br><br><br><img src='+graph_img+' alt="graphe" width="700" height="500">'
         sub.sortie.append(html_text)
         # --------------
